@@ -1,0 +1,13 @@
+engine/.venv/
+engine/data/*
+!engine/data/.gitkeep
+engine/outputs/*
+!engine/outputs/.gitkeep
+quant-ranking/.venv/
+quant-ranking/data/*
+!quant-ranking/data/.gitkeep
+quant-ranking/outputs/*
+!quant-ranking/outputs/.gitkeep
+__pycache__/
+*.pyc
+*.pt

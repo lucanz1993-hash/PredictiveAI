@@ -1,0 +1,5 @@
+# torch/torchvision vanno installati PRIMA e separatamente dall'indice CUDA,
+# altrimenti pip installa una build CPU-only come dipendenza di ultralytics:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+ultralytics
+opencv-python
