@@ -21,16 +21,16 @@ def fetch_ticker(ticker: str, force: bool = False) -> pd.DataFrame:
         return pd.read_parquet(cache_path)
 
     df = yf.Ticker(ticker).history(period=HISTORY_PERIOD, auto_adjust=True)
-    df = df[["Open", "High", "Low", "Close", "Volume"]]
+    df = df[["Open", "High", "Low", "Close", "Volume", "Stock Splits"]]
     df.index.name = "date"
     df.to_parquet(cache_path)
     return df
 
 
-def fetch_universe(force: bool = False) -> dict[str, pd.DataFrame]:
+def fetch_universe(tickers: list[str] = TICKERS, force: bool = False) -> dict[str, pd.DataFrame]:
     DATA_DIR.mkdir(exist_ok=True)
     data = {}
-    all_tickers = TICKERS + [BENCHMARK_TICKER]
+    all_tickers = tickers + [BENCHMARK_TICKER]
     for i, ticker in enumerate(all_tickers, start=1):
         print(f"[{i}/{len(all_tickers)}] {ticker}")
         try:
