@@ -88,7 +88,7 @@ def _portfolio_value(ledger: dict, prices: pd.Series) -> float:
     value = ledger["cash"]
     for position in ledger["positions"]:
         price = prices.get(position["ticker"])
-        if price is not None:
+        if price is not None and pd.notna(price):
             value += _position_value(position, price)
         else:
             value += position["notional"]  # prezzo non disponibile oggi: valore invariato

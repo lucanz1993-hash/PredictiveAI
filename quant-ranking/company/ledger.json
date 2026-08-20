@@ -73,17 +73,57 @@
       "entry_date": "2026-07-22"
     }
   ],
-  "sessions_since_rebalance": 0,
-  "last_mark_date": "2026-07-22",
+  "sessions_since_rebalance": 10,
+  "last_mark_date": "2026-08-20",
   "history": [
     {
       "date": "2026-07-23",
       "portfolio_value": 4996.25
+    },
+    {
+      "date": "2026-07-26",
+      "portfolio_value": 4996.25
+    },
+    {
+      "date": "2026-07-29",
+      "portfolio_value": 4996.25
+    },
+    {
+      "date": "2026-07-31",
+      "portfolio_value": 4948.832119647032
+    },
+    {
+      "date": "2026-08-02",
+      "portfolio_value": 4938.442962787843
+    },
+    {
+      "date": "2026-08-06",
+      "portfolio_value": 4947.524674672565
+    },
+    {
+      "date": "2026-08-07",
+      "portfolio_value": 4949.124549354442
+    },
+    {
+      "date": "2026-08-12",
+      "portfolio_value": 4872.346392212511
+    },
+    {
+      "date": "2026-08-13",
+      "portfolio_value": 4963.061431685852
+    },
+    {
+      "date": "2026-08-15",
+      "portfolio_value": 4990.063842392582
+    },
+    {
+      "date": "2026-08-21",
+      "portfolio_value": 4761.164522916181
     }
   ],
-  "salary_accrued": 0.0,
+  "salary_accrued": 20.0,
   "bonus_accrued": 0.0,
-  "last_salary_month": "2026-07",
+  "last_salary_month": "2026-08",
   "rebalance_log": [
     {
       "date": "2026-07-22",
