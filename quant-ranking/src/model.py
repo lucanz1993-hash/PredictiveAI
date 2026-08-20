@@ -23,6 +23,7 @@ def _model() -> LGBMClassifier:
         min_child_samples=50,
         importance_type="gain",
         verbosity=-1,
+        random_state=42,
     )
 
 

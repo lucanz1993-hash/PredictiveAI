@@ -39,6 +39,9 @@ from universe import UNIVERSES
 COMPANY_DIR = Path(__file__).resolve().parent.parent / "company"
 LEDGER_PATH = COMPANY_DIR / "ledger.json"
 REPORT_LOG_PATH = COMPANY_DIR / "reports.log"
+ALERTS_LOG_PATH = COMPANY_DIR / "alerts.log"
+KNOWN_GAPS_PATH = COMPANY_DIR / "known_gaps.json"
+MIN_COVERAGE_RATIO = 0.5  # sotto questa quota di ticker disponibili, abortire invece di calcolare un valore su dati incompleti
 
 TICKERS = UNIVERSES["small_mid_cap"]
 HORIZON = 21
@@ -77,6 +80,49 @@ def load_ledger() -> dict:
 def save_ledger(ledger: dict) -> None:
     COMPANY_DIR.mkdir(exist_ok=True)
     LEDGER_PATH.write_text(json.dumps(ledger, indent=2, default=str))
+
+
+def _load_known_gaps() -> set[str]:
+    if KNOWN_GAPS_PATH.exists():
+        return set(json.loads(KNOWN_GAPS_PATH.read_text()))
+    return set()
+
+
+def _check_coverage(fetched_tickers: set, expected_tickers: list, stage: str) -> None:
+    """Segnala (e, sotto una soglia minima, blocca) fetch giornalieri con
+    ticker mancanti -- senza questo controllo un fallimento parziale passa
+    silenzioso (solo un print per ticker in data_fetch.py/edgar_fetch.py) e
+    il portafoglio degrada per settimane prima che qualcuno se ne accorga.
+
+    Distingue gap gia' noti (es. JNPR/MRO acquisiti e delistati, o ticker con
+    un problema dati yfinance ricorrente) da mancanze nuove: solo le nuove
+    finiscono in alerts.log, altrimenti l'alert diventa rumore quotidiano
+    per problemi gia' noti e Luca smette di controllarlo. known_gaps.json va
+    aggiornato a mano quando un gap noto viene confermato/risolto."""
+    expected = set(expected_tickers)
+    missing = expected - fetched_tickers
+    if not missing:
+        return
+
+    ratio = len(fetched_tickers) / len(expected) if expected else 1.0
+    new_missing = sorted(missing - _load_known_gaps())
+
+    if new_missing:
+        message = (
+            f"[{_today_str()}] ALERT ({stage}): {len(new_missing)} ticker mancanti mai visti prima "
+            f"({', '.join(new_missing)}) -- probabile problema nuovo, non un gap gia' noto in {KNOWN_GAPS_PATH.name}"
+        )
+        COMPANY_DIR.mkdir(exist_ok=True)
+        with open(ALERTS_LOG_PATH, "a") as f:
+            f.write(message + "\n")
+        print(message)
+
+    if ratio < MIN_COVERAGE_RATIO:
+        raise RuntimeError(
+            f"Copertura dati troppo bassa in fase '{stage}': {len(fetched_tickers)}/{len(expected)} "
+            f"ticker ({ratio:.0%} < soglia {MIN_COVERAGE_RATIO:.0%}). Interrotto per non calcolare "
+            "un valore di portafoglio su dati incompleti."
+        )
 
 
 def _position_value(position: dict, current_price: float) -> float:
@@ -249,6 +295,7 @@ def run_once() -> str:
     probe_tickers = sorted({p["ticker"] for p in ledger["positions"]}) or TICKERS
     fetch_universe(probe_tickers, force=True)
     probe_panel = build_panel(probe_tickers)
+    _check_coverage(set(probe_panel.index.get_level_values("ticker").unique()), probe_tickers, stage="probe")
     data_date = probe_panel.index.get_level_values("date").max()
     data_date_str = data_date.strftime("%Y-%m-%d")
 
@@ -267,6 +314,7 @@ def run_once() -> str:
         fetch_universe(TICKERS, force=True)
         facts_by_ticker = fetch_universe_facts(TICKERS)
         panel = build_panel(TICKERS)
+        _check_coverage(set(panel.index.get_level_values("ticker").unique()), TICKERS, stage="full-universe")
         scores, data_date = get_live_scores(panel, facts_by_ticker)
         prices = panel["close"].xs(data_date, level="date")
         rebalance_note = rebalance(ledger, scores, prices, data_date)

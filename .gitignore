@@ -8,6 +8,7 @@ quant-ranking/data/*
 !quant-ranking/data/.gitkeep
 quant-ranking/outputs/*
 !quant-ranking/outputs/.gitkeep
+quant-ranking/company/task_run.log
 __pycache__/
 *.pyc
 *.pt
