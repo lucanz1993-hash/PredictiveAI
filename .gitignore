@@ -9,6 +9,9 @@ quant-ranking/data/*
 quant-ranking/outputs/*
 !quant-ranking/outputs/.gitkeep
 quant-ranking/company/task_run.log
+
+# Documenti cliente riservati (repo pubblico) -- mai tracciare
+/P1-2024 IOM/
 __pycache__/
 *.pyc
 *.pt
