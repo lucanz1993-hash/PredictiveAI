@@ -73,8 +73,8 @@
       "entry_date": "2026-07-22"
     }
   ],
-  "sessions_since_rebalance": 12,
-  "last_mark_date": "2026-08-24",
+  "sessions_since_rebalance": 13,
+  "last_mark_date": "2026-08-25",
   "history": [
     {
       "date": "2026-07-23",
@@ -127,6 +127,10 @@
     {
       "date": "2026-08-25",
       "portfolio_value": 4660.059820903622
+    },
+    {
+      "date": "2026-08-26",
+      "portfolio_value": 4575.051437918765
     }
   ],
   "salary_accrued": 20.0,
