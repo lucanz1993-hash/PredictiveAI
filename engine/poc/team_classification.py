@@ -6,14 +6,19 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import HDBSCAN
 
 from detect_track import MODEL_NAME, OUTPUT_DIR, find_input_video
 from video_codec import FOURCC, cv2
 
-# Numero di cluster attesi: squadra propria, avversari, portiere proprio,
-# portiere avversario, arbitro. Da regolare dopo aver visto i risultati.
-N_CLUSTERS = 5
+# HDBSCAN al posto di KMeans a k fisso: con due squadre numerose (migliaia di
+# tracce) e ruoli rari (portieri, arbitro, poche centinaia di tracce), KMeans
+# spalma la varianza sui cluster grandi e inghiotte quelli piccoli. HDBSCAN e'
+# density-based: trova cluster densi di qualsiasi dimensione e marca il resto
+# come rumore (-1) invece di forzarlo in un cluster esistente.
+# min_cluster_size va tarato in base alla frammentazione delle tracce (vedi
+# criticita' nota: ByteTrack produce molte tracce brevi per stessa persona).
+HDBSCAN_MIN_CLUSTER_SIZE = 20
 
 # Limite frame per iterazioni rapide durante lo sviluppo. None = tutti i frame nel CSV.
 MAX_FRAMES = None
@@ -22,9 +27,13 @@ MAX_FRAMES = None
 TORSO_TOP, TORSO_BOTTOM = 0.15, 0.55
 TORSO_MARGIN_X = 0.15
 
-# Maschera "verde campo" in HSV (scala hue OpenCV 0-179)
-GREEN_HUE_MIN, GREEN_HUE_MAX = 35, 90
-GREEN_SAT_MIN = 40
+# Maschera "verde campo" in HSV (scala hue OpenCV 0-179). Allargata da 35 a 45
+# sul lato basso e saturazione minima alzata da 40 a 50: a 35/40 rischiava di
+# mascherare come "campo" un giallo tenue/compresso che scivola verso il
+# chartreuse (es. portiere in maglia gialla), specie con la compressione video
+# di una camera economica. 45-90 lascia piu' margine al giallo puro (~hue 30).
+GREEN_HUE_MIN, GREEN_HUE_MAX = 45, 90
+GREEN_SAT_MIN = 50
 
 # Tonalità dominante del crop: istogramma pesato per saturazione (bin da 10° su
 # scala OpenCV 0-179) invece di una media circolare grezza. Una media mischia
@@ -120,8 +129,14 @@ def extract_signatures(video_path: Path, frame_tracks: dict):
     # di frame, invece di tenere ogni crop di ogni traccia
     reservoir = defaultdict(list)
     seen_count = defaultdict(int)
+    # posizione sul campo (centro bbox, x normalizzato 0-1 sulla larghezza
+    # frame) per traccia: usata a valle come segnale per distinguere portiere
+    # (fermo vicino a una porta) da arbitro (si muove su tutto il campo),
+    # non nel clustering colore per non introdurre rumore nella firma
+    positions_x = defaultdict(list)
 
     cap = cv2.VideoCapture(str(video_path))
+    frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 1
     frame_idx = 0
     while True:
         ret, frame = cap.read()
@@ -135,6 +150,9 @@ def extract_signatures(video_path: Path, frame_tracks: dict):
             if sig is not None:
                 tid = det["track_id"]
                 signatures[tid].append(sig)
+
+                x1, _, x2, _ = det["bbox"]
+                positions_x[tid].append((x1 + x2) / 2 / frame_width)
 
                 seen_count[tid] += 1
                 pool = reservoir[tid]
@@ -151,7 +169,7 @@ def extract_signatures(video_path: Path, frame_tracks: dict):
         if MAX_FRAMES is not None and frame_idx >= MAX_FRAMES:
             break
     cap.release()
-    return signatures, reservoir
+    return signatures, reservoir, positions_x
 
 
 def pick_representative_thumbs(track_to_cluster: dict, signatures: dict, reservoir: dict):
@@ -172,19 +190,24 @@ def pick_representative_thumbs(track_to_cluster: dict, signatures: dict, reservo
 
 def cluster_tracks(signatures: dict):
     track_ids = [tid for tid, sigs in signatures.items() if len(sigs) >= MIN_SAMPLES_PER_TRACK]
-    if len(track_ids) < N_CLUSTERS:
-        print(f"Solo {len(track_ids)} tracce valide, insufficienti per {N_CLUSTERS} cluster.")
+    if len(track_ids) < HDBSCAN_MIN_CLUSTER_SIZE:
+        print(f"Solo {len(track_ids)} tracce valide, insufficienti per il clustering.")
         sys.exit(1)
 
     features = np.array([np.median(np.stack(signatures[tid]), axis=0) for tid in track_ids])
-    km = KMeans(n_clusters=N_CLUSTERS, n_init=10, random_state=0)
-    labels = km.fit_predict(features)
+    hdb = HDBSCAN(min_cluster_size=HDBSCAN_MIN_CLUSTER_SIZE)
+    labels = hdb.fit_predict(features)
+
+    # -1 = rumore secondo HDBSCAN (nessun cluster denso), tenuto separato
+    n_noise = int(np.sum(labels == -1))
+    n_clusters = len(set(labels.tolist()) - {-1})
+    print(f"HDBSCAN: {n_clusters} cluster trovati, {n_noise} tracce di rumore su {len(track_ids)}")
 
     track_to_cluster = {tid: int(label) for tid, label in zip(track_ids, labels)}
     return track_to_cluster, features, labels
 
 
-def save_cluster_json(output_path: Path, track_to_cluster: dict, signatures: dict):
+def save_cluster_json(output_path: Path, track_to_cluster: dict, signatures: dict, positions_x: dict):
     clusters = defaultdict(list)
     for tid, cluster_id in track_to_cluster.items():
         clusters[cluster_id].append(tid)
@@ -195,6 +218,11 @@ def save_cluster_json(output_path: Path, track_to_cluster: dict, signatures: dic
             str(cid): {
                 "track_ids": tids,
                 "sample_count": sum(len(signatures[tid]) for tid in tids),
+                # posizione media (mediana delle mediane per traccia) e sua
+                # dispersione: bassa = fermo in una zona (candidato portiere),
+                # alta = si muove su tutto il campo (candidato arbitro/giocatore)
+                "median_x": round(float(np.median([np.median(positions_x[tid]) for tid in tids if positions_x.get(tid)])), 3),
+                "x_spread": round(float(np.std([np.median(positions_x[tid]) for tid in tids if positions_x.get(tid)])), 3),
             }
             for cid, tids in clusters.items()
         },
@@ -203,15 +231,18 @@ def save_cluster_json(output_path: Path, track_to_cluster: dict, signatures: dic
         json.dump(data, f, indent=2)
 
 
-def save_cluster_collage(output_path: Path, track_to_cluster: dict, representative_thumb: dict):
+def save_cluster_collage(output_path: Path, track_to_cluster: dict, representative_thumb: dict, cluster_meta: dict):
     clusters = defaultdict(list)
     for tid, cluster_id in track_to_cluster.items():
         if tid in representative_thumb:
             clusters[cluster_id].append(tid)
 
+    # cluster piu' popolati per primi, il rumore (-1) in fondo
+    order = sorted(clusters, key=lambda cid: (-1 if cid == -1 else 0, -len(clusters[cid])))
+
     rows = []
-    label_width = 80
-    for cluster_id in sorted(clusters):
+    label_width = 110
+    for cluster_id in order:
         sample_ids = clusters[cluster_id][:SAMPLES_PER_CLUSTER]
         thumbs = [representative_thumb[tid] for tid in sample_ids]
         while len(thumbs) < SAMPLES_PER_CLUSTER:
@@ -219,8 +250,12 @@ def save_cluster_collage(output_path: Path, track_to_cluster: dict, representati
         row_imgs = np.hstack(thumbs)
 
         label_panel = np.zeros((THUMB_SIZE[1], label_width, 3), dtype=np.uint8)
-        cv2.putText(label_panel, f"C{cluster_id}", (10, THUMB_SIZE[1] // 2 + 5),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        meta = cluster_meta.get(cluster_id, {})
+        name = "rumore" if cluster_id == -1 else f"C{cluster_id}"
+        cv2.putText(label_panel, name, (8, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+        cv2.putText(label_panel, f"n={len(clusters[cluster_id])}", (8, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (200, 200, 200), 1)
+        cv2.putText(label_panel, f"x={meta.get('median_x', 0):.2f}", (8, 68), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (200, 200, 200), 1)
+        cv2.putText(label_panel, f"sd={meta.get('x_spread', 0):.2f}", (8, 86), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (200, 200, 200), 1)
         rows.append(np.hstack([label_panel, row_imgs]))
 
     collage = np.vstack(rows)
@@ -273,7 +308,7 @@ def main():
     frame_tracks = load_tracks(tracks_csv_path)
 
     print("Estrazione firme colore per traccia...")
-    signatures, reservoir = extract_signatures(video_path, frame_tracks)
+    signatures, reservoir, positions_x = extract_signatures(video_path, frame_tracks)
     print(f"Tracce con almeno una firma valida: {len(signatures)}")
 
     print("Clustering...")
@@ -281,11 +316,14 @@ def main():
     representative_thumb = pick_representative_thumbs(track_to_cluster, signatures, reservoir)
 
     clusters_json_path = OUTPUT_DIR / f"{video_path.stem}_team_clusters.json"
-    save_cluster_json(clusters_json_path, track_to_cluster, signatures)
+    save_cluster_json(clusters_json_path, track_to_cluster, signatures, positions_x)
     print(f"Cluster salvati in: {clusters_json_path}")
 
+    cluster_meta = json.loads(clusters_json_path.read_text())["clusters"]
+    cluster_meta = {(-1 if k == "-1" else int(k)): v for k, v in cluster_meta.items()}
+
     collage_path = OUTPUT_DIR / f"{video_path.stem}_cluster_samples.jpg"
-    save_cluster_collage(collage_path, track_to_cluster, representative_thumb)
+    save_cluster_collage(collage_path, track_to_cluster, representative_thumb, cluster_meta)
     print(f"Collage di esempio salvata in: {collage_path}")
 
     print("Rendering video annotato per squadra...")
