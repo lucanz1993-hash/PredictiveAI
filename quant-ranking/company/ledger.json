@@ -3,148 +3,148 @@
   "cash": 0.0,
   "positions": [
     {
-      "ticker": "PODD",
+      "ticker": "DKS",
       "side": "long",
-      "entry_price": 147.47999572753906,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 137.5500030517578,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "TXRH",
+      "ticker": "ICUI",
       "side": "long",
-      "entry_price": 189.55999755859375,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "PWR",
-      "side": "long",
-      "entry_price": 624.4099731445312,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 163.22999572753906,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
       "ticker": "ZBRA",
       "side": "long",
-      "entry_price": 362.739990234375,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 386.57000732421875,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "JBL",
+      "ticker": "TER",
       "side": "long",
-      "entry_price": 310.57000732421875,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "WDC",
-      "side": "long",
-      "entry_price": 467.4599914550781,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "RL",
-      "side": "long",
-      "entry_price": 351.20001220703125,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "DKS",
-      "side": "long",
-      "entry_price": 139.14999389648438,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 380.2900085449219,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
       "ticker": "CLF",
       "side": "long",
-      "entry_price": 12.5,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 12.859999656677246,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "STX",
+      "ticker": "WAB",
       "side": "long",
-      "entry_price": 849.280029296875,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 286.510009765625,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "HBAN",
-      "side": "short",
-      "entry_price": 17.030000686645508,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "ticker": "PWR",
+      "side": "long",
+      "entry_price": 688.8800048828125,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "CF",
-      "side": "short",
-      "entry_price": 133.35000610351562,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "CR",
-      "side": "short",
-      "entry_price": 204.69000244140625,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "APA",
-      "side": "short",
-      "entry_price": 42.77000045776367,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "ticker": "MOS",
+      "side": "long",
+      "entry_price": 19.18000030517578,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
       "ticker": "DVA",
-      "side": "short",
-      "entry_price": 183.99000549316406,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "side": "long",
+      "entry_price": 182.0800018310547,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "STLD",
+      "side": "long",
+      "entry_price": 240.6300048828125,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
       "ticker": "IEX",
       "side": "short",
-      "entry_price": 223.74000549316406,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "RJF",
-      "side": "short",
-      "entry_price": 178.2899932861328,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
-    },
-    {
-      "ticker": "RF",
-      "side": "short",
-      "entry_price": 30.420000076293945,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 237.19000244140625,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
       "ticker": "DVN",
       "side": "short",
-      "entry_price": 48.060001373291016,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 50.209999084472656,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     },
     {
-      "ticker": "OVV",
+      "ticker": "CF",
       "side": "short",
-      "entry_price": 64.76000213623047,
-      "notional": 229.68622064100242,
-      "entry_date": "2026-09-04"
+      "entry_price": 117.25,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "STE",
+      "side": "short",
+      "entry_price": 217.77000427246094,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "NTAP",
+      "side": "short",
+      "entry_price": 239.00999450683594,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "CR",
+      "side": "short",
+      "entry_price": 203.75999450683594,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "FFIV",
+      "side": "short",
+      "entry_price": 476.239990234375,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "APA",
+      "side": "short",
+      "entry_price": 48.0099983215332,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "DECK",
+      "side": "short",
+      "entry_price": 84.0199966430664,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
+    },
+    {
+      "ticker": "AEO",
+      "side": "short",
+      "entry_price": 17.780000686645508,
+      "notional": 229.33013429976177,
+      "entry_date": "2026-10-13"
     }
   ],
-  "sessions_since_rebalance": 20,
-  "last_mark_date": "2026-10-12",
+  "sessions_since_rebalance": 0,
+  "last_mark_date": "2026-10-13",
   "history": [
     {
       "date": "2026-07-23",
@@ -313,6 +313,10 @@
     {
       "date": "2026-10-13",
       "portfolio_value": 4606.439428460459
+    },
+    {
+      "date": "2026-10-14",
+      "portfolio_value": 4586.602685995238
     }
   ],
   "salary_accrued": 60.0,
@@ -365,6 +369,35 @@
         "OVV",
         "RF",
         "RJF"
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "capital_before": 4588.495440364386,
+      "cost": 1.8927543691503095,
+      "long": [
+        "CLF",
+        "DKS",
+        "DVA",
+        "ICUI",
+        "MOS",
+        "PWR",
+        "STLD",
+        "TER",
+        "WAB",
+        "ZBRA"
+      ],
+      "short": [
+        "AEO",
+        "APA",
+        "CF",
+        "CR",
+        "DECK",
+        "DVN",
+        "FFIV",
+        "IEX",
+        "NTAP",
+        "STE"
       ]
     }
   ]
