@@ -143,8 +143,8 @@
       "entry_date": "2026-10-13"
     }
   ],
-  "sessions_since_rebalance": 9,
-  "last_mark_date": "2026-10-29",
+  "sessions_since_rebalance": 11,
+  "last_mark_date": "2026-11-02",
   "history": [
     {
       "date": "2026-07-23",
@@ -353,11 +353,19 @@
     {
       "date": "2026-10-30",
       "portfolio_value": 4571.968007306619
+    },
+    {
+      "date": "2026-11-02",
+      "portfolio_value": 4565.35754738459
+    },
+    {
+      "date": "2026-11-03",
+      "portfolio_value": 4600.38546546201
     }
   ],
-  "salary_accrued": 60.0,
+  "salary_accrued": 80.0,
   "bonus_accrued": 0.0,
-  "last_salary_month": "2026-10",
+  "last_salary_month": "2026-11",
   "rebalance_log": [
     {
       "date": "2026-07-22",
